@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Montesierpe · Performance Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rojo: #6B1A1A;
+  --rojo-dark: #4A1010;
+  --rojo-light: #8B2A2A;
+  --cal: #F0ECE0;
+  --noche: #1E1408;
+  --oro: #9A7C50;
+  --tierra: #B4905C;
+  --cerro: #8A7860;
+  --olivo: #4A5830;
+  --ladrillo: #C4784A;
+  --cal-dim: rgba(240,236,224,0.12);
+  --cal-mid: rgba(240,236,224,0.06);
+  --oro-dim: rgba(154,124,80,0.18);
+  --border: rgba(240,236,224,0.1);
+  --border-strong: rgba(240,236,224,0.18);
+  --green-bg: rgba(45,90,14,0.18);
+  --green-text: #7CC44A;
+  --red-bg: rgba(107,26,26,0.25);
+  --red-text: #E07070;
+  --amber-bg: rgba(196,120,74,0.2);
+  --amber-text: #E0A060;
+  --blue-bg: rgba(60,100,160,0.18);
+  --blue-text: #80AADE;
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Cormorant Garamond', serif;
+  --font-mono: 'DM Mono', monospace;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--noche);
+  color: var(--cal);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.page-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 40px);
+}
+
+/* ── HEADER ─────────────────────────────── */
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.header-left {}
+.brand-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--oro);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.brand-name {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 4vw, 30px);
+  font-weight: 500;
+  color: var(--cal);
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+.brand-sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: clamp(13px, 2vw, 16px);
+  color: var(--oro);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.header-right {
+  text-align: right;
+}
+.header-channels {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--cerro);
+  text-transform: uppercase;
+}
+.header-updated {
+  font-size: 12px;
+  color: var(--cal);
+  opacity: 0.4;
+  margin-top: 4px;
+}
+
+/* ── STAGE NAV ───────────────────────────── */
+.stage-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.stage-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  min-width: 0;
+}
+.stage-btn:hover {
+  border-color: var(--oro);
+  background: var(--oro-dim);
+}
+.stage-btn.active {
+  background: var(--rojo);
+  border-color: var(--rojo);
+}
+.stage-btn-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--cerro);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+.stage-btn.active .stage-btn-label { color: #C4A882; }
+.stage-btn-dates {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cal);
+  white-space: nowrap;
+}
+.stage-btn.active .stage-btn-dates { color: var(--cal); }
+
+/* ── INVEST BANNER ───────────────────────── */
+.invest-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+@media (max-width: 600px) {
+  .invest-grid { grid-template-columns: 1fr; }
+}
+
+.invest-card {
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  background: var(--cal-mid);
+  transition: border-color 0.2s;
+}
+.invest-card.total {
+  background: var(--rojo);
+  border-color: var(--rojo-light);
+}
+.invest-card-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  margin-bottom: 6px;
+}
+.invest-card.total .invest-card-label { color: #C4A882; }
+.invest-card-value {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3.5vw, 28px);
+  font-weight: 400;
+  color: var(--cal);
+  line-height: 1.1;
+}
+.invest-card.total .invest-card-value { color: var(--cal); }
+.invest-card-sub {
+  font-size: 11px;
+  color: var(--cerro);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+.invest-card.total .invest-card-sub { color: #C4A882; }
+
+/* Editable investment input */
+.invest-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.invest-edit-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  white-space: nowrap;
+}
+.invest-edit-input {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cal);
+  width: 80px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.invest-edit-input:focus { border-color: var(--oro); }
+.invest-edit-btn {
+  background: var(--oro-dim);
+  border: 1px solid var(--oro);
+  border-radius: var(--r-sm);
+  padding: 5px 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--oro);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.invest-edit-btn:hover { background: var(--oro); color: var(--noche); }
+
+.invest-edit-select {
+  background: var(--cal-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--cal);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.invest-edit-select:focus { border-color: var(--oro); }
+.invest-edit-select option { background: #2a1f0e; color: var(--cal); }
+
+/* Log de inversiones */
+.invest-log {
+  margin-top: 10px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.invest-log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.invest-log-item:last-child { border-bottom: none; }
+.invest-log-date { color: var(--cerro); }
+.invest-log-amount { color: var(--cal); font-weight: 500; }
+.invest-log-remove {
+  background: none;
+  border: none;
+  color: var(--cerro);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.invest-log-remove:hover { opacity: 1; color: var(--red-text); }
+
+/* ── SECTION TITLE ───────────────────────── */
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  margin-top: 28px;
+}
+.section-title:first-of-type { margin-top: 0; }
+
+/* ── KPI GRID ────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 800px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 420px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.kpi {
+  background: var(--cal-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.kpi-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2.5vw, 22px);
+  font-weight: 400;
+  color: var(--cal);
+  line-height: 1.1;
+}
+.kpi-value.c-red { color: var(--red-text); }
+.kpi-value.c-green { color: var(--green-text); }
+.kpi-sub {
+  font-size: 11px;
+  color: var(--cerro);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* ── CONTENT TABLE ───────────────────────── */
+.content-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.content-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 480px;
+}
+.content-table th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+.content-table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--cal);
+  vertical-align: middle;
+}
+.content-table tr:last-child td { border-bottom: none; }
+.content-table td:first-child { font-weight: 500; }
+
+/* ── CAMPAIGNS ───────────────────────────── */
+.campaigns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 650px) { .campaigns-grid { grid-template-columns: 1fr; } }
+
+.camp-card {
+  background: var(--cal-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+}
+.camp-card.active-card {
+  border-color: var(--oro);
+  background: var(--oro-dim);
+  grid-column: 1 / -1;
+}
+@media (max-width: 650px) { .camp-card.active-card { grid-column: 1; } }
+
+.camp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.camp-name {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cal);
+  line-height: 1.3;
+}
+.camp-period {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cerro);
+  margin-top: 3px;
+  letter-spacing: 0.06em;
+}
+
+.camp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.camp-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  margin-bottom: 3px;
+}
+.camp-stat-value {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--cal);
+}
+.camp-stat-value.green { color: var(--green-text); }
+.camp-stat-value.red { color: var(--red-text); }
+.camp-stat-value.gold { color: var(--tierra); }
+
+/* ── BADGE ───────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.badge-active { background: var(--green-bg); color: var(--green-text); border: 1px solid rgba(124,196,74,0.25); }
+.badge-off { background: var(--cal-mid); color: var(--cerro); border: 1px solid var(--border); }
+.badge-done { background: var(--blue-bg); color: var(--blue-text); border: 1px solid rgba(128,170,222,0.2); }
+
+/* ── PILL ────────────────────────────────── */
+.pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pill-green { background: var(--green-bg); color: var(--green-text); }
+.pill-amber { background: var(--amber-bg); color: var(--amber-text); }
+.pill-blue { background: var(--blue-bg); color: var(--blue-text); }
+.pill-red { background: var(--red-bg); color: var(--red-text); }
+
+/* ── ADSET TABLE ─────────────────────────── */
+.adset-table-wrap { overflow-x: auto; margin-top: 14px; -webkit-overflow-scrolling: touch; }
+.adset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 480px;
+}
+.adset-table th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+.adset-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--cal);
+  vertical-align: middle;
+}
+.adset-table tr:last-child td { border-bottom: none; }
+
+/* ── GEO ─────────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+.geo-col-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--cerro);
+  margin-bottom: 12px;
+}
+.geo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.geo-label {
+  font-size: 12px;
+  color: var(--cal);
+  opacity: 0.7;
+  min-width: 110px;
+  max-width: 110px;
+}
+.geo-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--cal-dim);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.geo-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--rojo);
+}
+.geo-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cal);
+  min-width: 48px;
+  text-align: right;
+}
+
+/* ── BILLING GRID ────────────────────────── */
+.billing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+.billing-day {
+  background: var(--cal-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 8px;
+  text-align: center;
+}
+.billing-day.highlight { border-color: var(--oro); background: var(--oro-dim); }
+.billing-day.recarga { border-color: rgba(74,88,48,0.5); background: var(--green-bg); }
+.billing-day.entry-meta { border-color: var(--tierra); background: rgba(180,144,92,0.12); }
+.billing-day.entry-tiktok { border-color: #7CC44A; background: rgba(124,196,74,0.1); }
+.billing-day.entry-meta .billing-day-date,
+.billing-day.entry-tiktok .billing-day-date { opacity: 1; }
+.billing-day-platform {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+.entry-meta .billing-day-platform { color: var(--tierra); }
+.entry-tiktok .billing-day-platform { color: var(--green-text); }
+.billing-day-remove {
+  display: block;
+  background: none;
+  border: none;
+  color: var(--cerro);
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s;
+  margin: 4px auto 0;
+  padding: 0;
+}
+.billing-day:hover .billing-day-remove { opacity: 0.7; }
+.billing-day-remove:hover { opacity: 1 !important; color: var(--red-text); }
+.billing-day-date {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--cerro);
+  text-transform: uppercase;
+}
+.billing-day-amount {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--cal);
+  margin-top: 4px;
+}
+.billing-day.recarga .billing-day-amount { color: var(--green-text); }
+.billing-note {
+  font-size: 12px;
+  color: var(--cerro);
+  line-height: 1.6;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--cal-mid);
+  border-radius: var(--r-sm);
+  border-left: 2px solid var(--oro);
+}
+.billing-note strong { color: var(--cal); font-weight: 500; }
+
+/* ── ALERTS ──────────────────────────────── */
+.alerts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 600px) { .alerts-grid { grid-template-columns: 1fr; } }
+
+.insight-box {
+  background: var(--cal-mid);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  border-left: 2px solid var(--oro);
+}
+.insight-box.alert-red { border-left-color: var(--red-text); }
+.insight-box.alert-green { border-left-color: var(--green-text); }
+.insight-box p { font-size: 13px; color: var(--cal); opacity: 0.75; line-height: 1.6; }
+.insight-box strong { color: var(--cal); opacity: 1; font-weight: 500; }
+
+/* ── DIVIDER ─────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+/* ── FOOTER ──────────────────────────────── */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--rojo);
+  border-radius: var(--r-lg);
+  margin-top: 28px;
+}
+.footer-item {
+  font-size: 12px;
+  color: #C4A882;
+}
+.footer-item strong { color: var(--cal); font-weight: 500; }
+
+/* ── SCROLL ──────────────────────────────── */
+.invest-log::-webkit-scrollbar { width: 4px; }
+.invest-log::-webkit-scrollbar-track { background: transparent; }
+.invest-log::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+/* ── STAGE CONTENT ───────────────────────── */
+.stage-content { display: none; }
+.stage-content.visible { display: block; }
+
+/* ── PLACEHOLDER STAGE ───────────────────── */
+.placeholder-stage {
+  padding: 60px 20px;
+  text-align: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-xl);
+  margin-top: 8px;
+}
+.placeholder-stage p {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--cerro);
+  line-height: 1.7;
+}
+.placeholder-stage .placeholder-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+/* ── STAGE DATE EDITOR ───────────────────── */
+.stage-btn-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+}
+.stage-edit-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: var(--r-sm);
+  color: var(--cerro);
+  font-size: 11px;
+  line-height: 1;
+  transition: color 0.2s, background 0.2s;
+  align-self: flex-end;
+  margin-top: 4px;
+  opacity: 0.5;
+}
+.stage-edit-trigger:hover { color: var(--oro); background: var(--oro-dim); opacity: 1; }
+.stage-btn:hover .stage-edit-trigger,
+.stage-btn.active .stage-edit-trigger { opacity: 1; }
+
+.stage-date-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 200;
+  background: #2A1C0E;
+  border: 1px solid var(--oro);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  min-width: 260px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+.stage-date-panel.open { display: block; }
+.stage-date-panel-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--oro);
+  margin-bottom: 14px;
+}
+.stage-date-field {
+  margin-bottom: 12px;
+}
+.stage-date-field label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  margin-bottom: 5px;
+}
+.stage-date-field input[type="date"] {
+  width: 100%;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cal);
+  outline: none;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+.stage-date-field input[type="date"]:focus { border-color: var(--oro); }
+.stage-date-field input[type="text"] {
+  width: 100%;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--cal);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.stage-date-field input[type="text"]:focus { border-color: var(--oro); }
+.stage-date-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.stage-date-save {
+  flex: 1;
+  background: var(--rojo);
+  border: 1px solid var(--rojo-light);
+  border-radius: var(--r-sm);
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cal);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.stage-date-save:hover { background: var(--rojo-light); }
+.stage-date-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.stage-date-cancel:hover { border-color: var(--cerro); color: var(--cal); }
+
+/* ── TOAST ───────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--rojo);
+  color: var(--cal);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 10px 18px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--rojo-light);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── PLATFORM NAV ────────────────────────── */
+.platform-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cal-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+}
+.platform-btn:hover {
+  border-color: var(--oro);
+  background: var(--oro-dim);
+}
+.platform-btn.active-meta {
+  background: rgba(180,144,92,0.15);
+  border-color: var(--tierra);
+}
+.platform-btn.active-tiktok {
+  background: rgba(30,30,30,0.5);
+  border-color: rgba(240,236,224,0.35);
+}
+.platform-btn-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.platform-btn-text {}
+.platform-btn-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--cal);
+  letter-spacing: 0.06em;
+  display: block;
+  line-height: 1;
+}
+.platform-btn-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--cerro);
+  text-transform: uppercase;
+  display: block;
+  margin-top: 3px;
+}
+.platform-btn.active-meta .platform-btn-sub { color: var(--tierra); }
+.platform-btn.active-tiktok .platform-btn-sub { color: rgba(240,236,224,0.5); }
+
+/* ── CHANNEL TABS (Orgánico / Pauta) ─────── */
+.channel-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.channel-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cerro);
+}
+.channel-tab:hover { color: var(--cal); }
+.channel-tab.active {
+  color: var(--cal);
+  border-bottom-color: var(--oro);
+}
+
+/* ── PLATFORM VIEWS ──────────────────────── */
+.platform-view { display: none; }
+.platform-view.visible { display: block; }
+.channel-view { display: none; }
+.channel-view.visible { display: block; }
+
+/* ── TIKTOK ORGANIC KPI CARDS ─────────────── */
+.tiktok-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (max-width: 800px) { .tiktok-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.tiktok-kpi {
+  background: var(--cal-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.tiktok-kpi-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  margin-bottom: 6px;
+}
+.tiktok-kpi-value {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2.5vw, 22px);
+  font-weight: 400;
+  color: var(--cal);
+  line-height: 1.1;
+}
+.tiktok-kpi-delta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-top: 4px;
+}
+.delta-up { color: var(--green-text); }
+.delta-down { color: var(--red-text); }
+
+/* ── AUDIENCE DEMO ────────────────────────── */
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 4px;
+}
+@media (max-width: 600px) { .demo-grid { grid-template-columns: 1fr; } }
+
+.demo-card {
+  background: var(--cal-mid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
+}
+.demo-card-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cerro);
+  margin-bottom: 14px;
+}
+.gender-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.gender-label { font-size: 12px; color: var(--cal); opacity: 0.7; min-width: 70px; }
+.gender-bar-wrap { flex: 1; height: 6px; background: var(--cal-dim); border-radius: 3px; overflow: hidden; }
+.gender-bar { height: 100%; border-radius: 3px; }
+.gender-bar.male { background: var(--rojo); }
+.gender-bar.female { background: var(--tierra); }
+.gender-pct { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--cal); min-width: 36px; text-align: right; }
+
+.age-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.age-label { font-size: 12px; color: var(--cal); opacity: 0.7; min-width: 50px; }
+.age-bar-wrap { flex: 1; height: 4px; background: var(--cal-dim); border-radius: 2px; overflow: hidden; }
+.age-bar { height: 100%; border-radius: 2px; background: var(--rojo); }
+.age-pct { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--cal); min-width: 42px; text-align: right; }
+
+/* ── TOP VIDEOS TABLE ────────────────────── */
+.tiktok-top-video {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.tiktok-top-video:last-child { border-bottom: none; }
+.ttv-rank {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--oro);
+  opacity: 0.5;
+  min-width: 24px;
+  text-align: center;
+}
+.ttv-info { flex: 1; min-width: 0; }
+.ttv-title { font-size: 13px; color: var(--cal); font-weight: 500; line-height: 1.3; }
+.ttv-date { font-family: var(--font-mono); font-size: 10px; color: var(--cerro); margin-top: 2px; }
+.ttv-stats {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.ttv-stat { text-align: right; }
+.ttv-stat-val { font-family: var(--font-display); font-size: 14px; color: var(--cal); }
+.ttv-stat-lbl { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cerro); }
+
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="brand-eyebrow">Performance Dashboard · Digital</div>
+      <div class="brand-name">MONTESIERPE</div>
+      <div class="brand-sub">Casa Hacienda</div>
+    </div>
+    <div class="header-right">
+      <div class="header-channels">Meta Ads · Meta Orgánico · TikTok Ads · TikTok Orgánico</div>
+      <div class="header-updated" id="last-updated">Actualizado: cargando...</div>
+    </div>
+  </div>
+
+  <!-- STAGE NAVIGATION -->
+  <div class="stage-nav" id="stage-nav">
+
+    <!-- Etapa 1 -->
+    <div class="stage-btn-wrap" id="wrap-1">
+      <button class="stage-btn active" data-stage="1" onclick="switchStage(1)">
+        <span class="stage-btn-label">Etapa 1</span>
+        <span class="stage-btn-dates" id="stage-dates-label-1">7 abr → 8 may</span>
+      </button>
+      <button class="stage-edit-trigger" onclick="toggleDatePanel(event,1)" title="Editar fechas">✎</button>
+      <div class="stage-date-panel" id="date-panel-1">
+        <div class="stage-date-panel-title">Editar Etapa 1</div>
+        <div class="stage-date-field">
+          <label>Fecha inicio</label>
+          <input type="date" id="panel-start-1" value="2026-04-07">
+        </div>
+        <div class="stage-date-field">
+          <label>Fecha fin</label>
+          <input type="date" id="panel-end-1" value="2026-05-08">
+        </div>
+        <div class="stage-date-field">
+          <label>Nombre de etapa (opcional)</label>
+          <input type="text" id="panel-name-1" placeholder="Ej: Lanzamiento" maxlength="40">
+        </div>
+        <div class="stage-date-actions">
+          <button class="stage-date-save" onclick="saveDatePanel(1)">Guardar</button>
+          <button class="stage-date-cancel" onclick="closeDatePanel(1)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Etapa 2 -->
+    <div class="stage-btn-wrap" id="wrap-2">
+      <button class="stage-btn" data-stage="2" onclick="switchStage(2)">
+        <span class="stage-btn-label">Etapa 2</span>
+        <span class="stage-btn-dates" id="stage-dates-label-2">4 may → 7 jun</span>
+      </button>
+      <button class="stage-edit-trigger" onclick="toggleDatePanel(event,2)" title="Editar fechas">✎</button>
+      <div class="stage-date-panel" id="date-panel-2">
+        <div class="stage-date-panel-title">Editar Etapa 2</div>
+        <div class="stage-date-field">
+          <label>Fecha inicio</label>
+          <input type="date" id="panel-start-2" value="2026-05-04">
+        </div>
+        <div class="stage-date-field">
+          <label>Fecha fin</label>
+          <input type="date" id="panel-end-2" value="2026-06-07">
+        </div>
+        <div class="stage-date-field">
+          <label>Nombre de etapa (opcional)</label>
+          <input type="text" id="panel-name-2" placeholder="Ej: Crecimiento" maxlength="40">
+        </div>
+        <div class="stage-date-actions">
+          <button class="stage-date-save" onclick="saveDatePanel(2)">Guardar</button>
+          <button class="stage-date-cancel" onclick="closeDatePanel(2)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Etapa 3 -->
+    <div class="stage-btn-wrap" id="wrap-3">
+      <button class="stage-btn" data-stage="3" onclick="switchStage(3)">
+        <span class="stage-btn-label">Etapa 3</span>
+        <span class="stage-btn-dates" id="stage-dates-label-3">Por definir</span>
+      </button>
+      <button class="stage-edit-trigger" onclick="toggleDatePanel(event,3)" title="Editar fechas">✎</button>
+      <div class="stage-date-panel" id="date-panel-3">
+        <div class="stage-date-panel-title">Editar Etapa 3</div>
+        <div class="stage-date-field">
+          <label>Fecha inicio</label>
+          <input type="date" id="panel-start-3">
+        </div>
+        <div class="stage-date-field">
+          <label>Fecha fin</label>
+          <input type="date" id="panel-end-3">
+        </div>
+        <div class="stage-date-field">
+          <label>Nombre de etapa (opcional)</label>
+          <input type="text" id="panel-name-3" placeholder="Ej: Consolidación" maxlength="40">
+        </div>
+        <div class="stage-date-actions">
+          <button class="stage-date-save" onclick="saveDatePanel(3)">Guardar</button>
+          <button class="stage-date-cancel" onclick="closeDatePanel(3)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- ETAPA 1 -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="stage-content visible" id="stage-1">
+
+    <!-- INVEST BANNER (siempre visible) -->
+    <div class="invest-grid">
+      <div class="invest-card total">
+        <div class="invest-card-label">Inversión total ejecutada</div>
+        <div class="invest-card-value" id="total-invest-1">S/ 174.52</div>
+        <div class="invest-card-sub" id="total-invest-sub-1">Meta + TikTok · 7 abr – 8 may</div>
+      </div>
+      <div class="invest-card">
+        <div class="invest-card-label">Meta Ads</div>
+        <div class="invest-card-value" style="color:var(--tierra);" id="meta-display-1">S/ 149.52</div>
+        <div class="invest-card-sub">3 campañas · S/ 12/día presupuesto</div>
+        <div class="invest-edit-row">
+          <span class="invest-edit-label">+ Registrar</span>
+          <select class="invest-edit-select" id="meta-type-1">
+            <option value="consumo">Consumo</option>
+            <option value="recarga">Recarga</option>
+          </select>
+          <input class="invest-edit-input" type="number" step="0.01" min="0" placeholder="S/ 0.00" id="meta-input-1">
+          <input class="invest-edit-input" type="date" id="meta-date-1" style="width:110px;">
+          <button class="invest-edit-btn" onclick="addEntry('meta',1)">Añadir</button>
+        </div>
+        <div class="invest-log" id="meta-log-1"></div>
+      </div>
+      <div class="invest-card">
+        <div class="invest-card-label">TikTok Ads</div>
+        <div class="invest-card-value" style="color:var(--green-text);" id="tiktok-display-1">S/ 25.00</div>
+        <div class="invest-card-sub">Pauta activada en el período</div>
+        <div class="invest-edit-row">
+          <span class="invest-edit-label">+ Registrar</span>
+          <select class="invest-edit-select" id="tiktok-type-1">
+            <option value="consumo">Consumo</option>
+            <option value="recarga">Recarga</option>
+          </select>
+          <input class="invest-edit-input" type="number" step="0.01" min="0" placeholder="S/ 0.00" id="tiktok-input-1">
+          <input class="invest-edit-input" type="date" id="tiktok-date-1" style="width:110px;">
+          <button class="invest-edit-btn" onclick="addEntry('tiktok',1)">Añadir</button>
+        </div>
+        <div class="invest-log" id="tiktok-log-1"></div>
+      </div>
+    </div>
+
+    <!-- FACTURACIÓN DIARIA -->
+    <div class="section-title" id="billing-title-1">Facturación diaria — Meta Ads &amp; TikTok Ads</div>
+    <div class="billing-grid" id="billing-grid-1"></div>
+    <div class="billing-note">
+      Consumo real facturado: <strong>S/ 171.00</strong> (Meta S/ 146.00 + TikTok S/ 25.00) · Recargas Meta: <strong>S/ 250.00</strong> (S/ 150.00 el 24 abr + S/ 100.00 el 8 may) · Recargas TikTok: <strong>S/ 75.00</strong> (S/ 25.00 el 24 abr + S/ 50.00 el 5 may)
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ── PLATFORM SELECTOR ─────────────────── -->
+    <div class="platform-nav" id="platform-nav-1">
+      <button class="platform-btn active-meta" id="plat-btn-meta-1" onclick="switchPlatform(1,'meta')">
+        <div class="platform-btn-icon">𝗳</div>
+        <div class="platform-btn-text">
+          <span class="platform-btn-name">Meta</span>
+          <span class="platform-btn-sub">Facebook · Instagram</span>
+        </div>
+      </button>
+      <button class="platform-btn" id="plat-btn-tiktok-1" onclick="switchPlatform(1,'tiktok')">
+        <div class="platform-btn-icon" style="font-size:18px;">♪</div>
+        <div class="platform-btn-text">
+          <span class="platform-btn-name">TikTok</span>
+          <span class="platform-btn-sub">7 abr – 8 may 2026</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- ══ VISTA META ═══════════════════════════ -->
+    <div class="platform-view visible" id="plat-meta-1">
+
+      <!-- Channel tabs -->
+      <div class="channel-tabs">
+        <button class="channel-tab active" id="tab-meta-organico-1" onclick="switchChannel(1,'meta','organico')">Orgánico</button>
+        <button class="channel-tab" id="tab-meta-pauta-1" onclick="switchChannel(1,'meta','pauta')">Pauta</button>
+      </div>
+
+      <!-- META ORGÁNICO -->
+      <div class="channel-view visible" id="ch-meta-organico-1">
+        <div class="section-title" style="margin-top:0;">Alcance orgánico — Facebook (período completo)</div>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Visualizaciones</div><div class="kpi-value c-red">17,200</div><div class="kpi-sub">↑ 100% vs período ant. · 1,526 orgánicas / 15,672 anuncios</div></div>
+          <div class="kpi"><div class="kpi-label">Espectadores únicos</div><div class="kpi-value c-red">12,700</div><div class="kpi-sub">Alcance real de personas</div></div>
+          <div class="kpi"><div class="kpi-label">Interacciones</div><div class="kpi-value">191</div><div class="kpi-sub">Likes + cmts + compartidos</div></div>
+          <div class="kpi"><div class="kpi-label">Clics en enlace</div><div class="kpi-value">735</div><div class="kpi-sub">↑ 100% vs período ant.</div></div>
+          <div class="kpi"><div class="kpi-label">Visitas al perfil</div><div class="kpi-value">906</div><div class="kpi-sub">Sesiones en página</div></div>
+          <div class="kpi"><div class="kpi-label">Nuevos seguidores</div><div class="kpi-value c-green">89</div><div class="kpi-sub">↑ 100% vs período ant.</div></div>
+          <div class="kpi"><div class="kpi-label">Conversaciones iniciadas</div><div class="kpi-value c-green">83</div><div class="kpi-sub">Contactos nuevos vía mensajes</div></div>
+          <div class="kpi"><div class="kpi-label">Índice de respuesta</div><div class="kpi-value">9.5%</div><div class="kpi-sub">Tiempo promedio: 2h 23min</div></div>
+          <div class="kpi"><div class="kpi-label">Posts publicados</div><div class="kpi-value">2</div><div class="kpi-sub">2 Reels · Facebook + Instagram</div></div>
+        </div>
+        <div class="section-title" style="margin-top:20px;">Contenido orgánico reciente</div>
+        <div class="content-table-wrap">
+          <table class="content-table">
+            <thead>
+              <tr><th>Contenido</th><th>Fecha</th><th>Vistas</th><th>Likes</th><th>Cmts</th><th>Compartidos</th><th>Eng. rate</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Reel gastronómico · "En Montesierpe Casa Hacienda puedes..."</td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--cerro);">1 may</td>
+                <td>1,039</td><td>14</td><td>4</td><td>5</td>
+                <td><span class="pill pill-green">2.2%</span></td>
+              </tr>
+              <tr>
+                <td>Reel ruta al sur · "Tu próxima parada en la ruta al sur..."</td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--cerro);">24 abr</td>
+                <td>385</td><td>12</td><td>5</td><td>3</td>
+                <td><span class="pill pill-amber">5.2%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /ch-meta-organico -->
+
+      <!-- META PAUTA -->
+      <div class="channel-view" id="ch-meta-pauta-1">
+        <div class="section-title" style="margin-top:0;">Campañas pagadas — Meta Ads · 7 abr – 8 may 2026</div>
+        <div class="campaigns-grid">
+
+          <div class="camp-card active-card">
+            <div class="camp-header">
+              <div>
+                <div class="camp-name">INT | Montesierpe | Prospecting</div>
+                <div class="camp-period">13 abr – 12 may 2026 · Mensajes · S/ 12/día · 3 conjuntos</div>
+              </div>
+              <span class="badge badge-active">Activa</span>
+            </div>
+            <div class="camp-stats" style="grid-template-columns: repeat(4, 1fr);">
+              <div><div class="camp-stat-label">Conversaciones</div><div class="camp-stat-value gold">183</div></div>
+              <div><div class="camp-stat-label">CPR promedio</div><div class="camp-stat-value green">S/ 0.69</div></div>
+              <div><div class="camp-stat-label">Conversaciones (7 abr – 8 may)</div><div class="camp-stat-value gold">83</div></div>
+              <div><div class="camp-stat-label">Inversión</div><div class="camp-stat-value red">S/ 149.52</div></div>
+            </div>
+            <div class="adset-table-wrap">
+              <table class="adset-table">
+                <thead>
+                  <tr><th>Conjunto</th><th>Estado</th><th>Conv.</th><th>CPR</th><th>Benchmark</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:500;">N°3 Tráfico Lima + Lima Sur Amplio</td>
+                    <td><span class="pill pill-green">Activo</span></td>
+                    <td>100</td>
+                    <td style="color:var(--green-text);font-weight:500;">S/ 0.09</td>
+                    <td><span class="pill pill-green">93.53% por debajo</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;">N°2 Tráfico Lima + Lima Sur Amplio</td>
+                    <td><span class="pill pill-green">Activo</span></td>
+                    <td>76</td>
+                    <td style="color:var(--green-text);font-weight:500;">S/ 0.43</td>
+                    <td><span class="pill pill-green">62.83% por debajo</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;">N°1 Tráfico Lima + Lima Sur Amplio</td>
+                    <td><span class="pill pill-amber">Bajo rend.</span></td>
+                    <td>7</td>
+                    <td style="color:var(--red-text);font-weight:500;">S/ 1.45</td>
+                    <td><span class="pill">N/A</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title">Ruta de conversión pagada — Meta Ads</div>
+        <div style="background:var(--cal-mid);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 18px;">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;">
+            <div>
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--cerro);margin-bottom:6px;">Clics (Pagado)</div>
+              <div style="font-family:var(--font-display);font-size:22px;color:var(--cal);">735</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--oro);">→ 11.2%</div>
+            <div>
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--cerro);margin-bottom:6px;">Conversaciones iniciadas</div>
+              <div style="font-family:var(--font-display);font-size:22px;color:var(--cal);">82</div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--cerro);margin-bottom:6px;">Clientes potenciales / Compras</div>
+              <div style="font-family:var(--font-display);font-size:22px;color:var(--cerro);">0 / 0</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--cerro);line-height:1.6;">
+            Creativos por CPR: <strong style="color:var(--cal);">Reel N°3 "Qué hacer en Montesierpe"</strong> S/ 0.09 · <strong style="color:var(--cal);">Reel N°2 "Quiénes Somos"</strong> S/ 0.43 · <strong style="color:var(--cal);">Reel N°1 "Dónde nos encontramos"</strong> S/ 1.45
+          </div>
+        </div>
+
+      </div><!-- /ch-meta-pauta -->
+
+    </div><!-- /plat-meta-1 -->
+
+    <!-- ══ VISTA TIKTOK ═════════════════════════ -->
+    <div class="platform-view" id="plat-tiktok-1">
+
+      <!-- Channel tabs -->
+      <div class="channel-tabs">
+        <button class="channel-tab active" id="tab-tiktok-organico-1" onclick="switchChannel(1,'tiktok','organico')">Orgánico</button>
+        <button class="channel-tab" id="tab-tiktok-pauta-1" onclick="switchChannel(1,'tiktok','pauta')">Pauta</button>
+      </div>
+
+      <!-- TIKTOK ORGÁNICO -->
+      <div class="channel-view visible" id="ch-tiktok-organico-1">
+
+        <div class="section-title" style="margin-top:0;">Alcance orgánico — TikTok · 7 abr – 8 may 2026</div>
+
+        <!-- Alcance -->
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--cerro);margin-bottom:10px;">Alcance</div>
+        <div class="tiktok-kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Visualizaciones</div>
+            <div class="tiktok-kpi-value">12,813</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +96.01% vs período ant.</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Público alcanzado</div>
+            <div class="tiktok-kpi-value">12,650</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +117.02% vs período ant.</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Vis. del perfil</div>
+            <div class="tiktok-kpi-value">80</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +471.43% vs período ant.</div>
+          </div>
+        </div>
+
+        <!-- Interacciones -->
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--cerro);margin-bottom:10px;">Interacciones</div>
+        <div class="tiktok-kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Me gusta</div>
+            <div class="tiktok-kpi-value">465</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +192.45%</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Compartidos</div>
+            <div class="tiktok-kpi-value">110</div>
+            <div class="tiktok-kpi-delta delta-up">↑ &gt;999.99%</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Comentarios</div>
+            <div class="tiktok-kpi-value">8</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +700.00%</div>
+          </div>
+        </div>
+
+        <!-- Seguidores -->
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--cerro);margin-bottom:10px;">Seguidores &amp; Audiencia comprometida</div>
+        <div class="tiktok-kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px;">
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Crecimiento neto</div>
+            <div class="tiktok-kpi-value">173</div>
+            <div class="tiktok-kpi-delta delta-down">↓ −7.98% vs período ant.</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Nuevos seguidores</div>
+            <div class="tiktok-kpi-value">181</div>
+            <div class="tiktok-kpi-delta delta-down">↓ −4.23% vs período ant.</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Seguidores perdidos</div>
+            <div class="tiktok-kpi-value">8</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +700% (atípico)</div>
+          </div>
+          <div class="tiktok-kpi">
+            <div class="tiktok-kpi-label">Espect. comprometidos</div>
+            <div class="tiktok-kpi-value">1,138</div>
+            <div class="tiktok-kpi-delta delta-up">↑ +521.86%</div>
+          </div>
+        </div>
+
+        <!-- Top videos -->
+        <div class="section-title">Top contenido orgánico — TikTok</div>
+        <div style="background:var(--cal-mid);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 18px;">
+          <div class="tiktok-top-video">
+            <div class="ttv-rank">1</div>
+            <div class="ttv-info">
+              <div class="ttv-title">Reel gastronómico · camarones / langostinos en hacienda</div>
+              <div class="ttv-date">1 de mayo de 2026</div>
+            </div>
+            <div class="ttv-stats">
+              <div class="ttv-stat"><div class="ttv-stat-val">5,700</div><div class="ttv-stat-lbl">Vistas</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">581</div><div class="ttv-stat-lbl">Likes</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">48</div><div class="ttv-stat-lbl">Comp.</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">4</div><div class="ttv-stat-lbl">Cmts</div></div>
+            </div>
+          </div>
+          <div class="tiktok-top-video">
+            <div class="ttv-rank">2</div>
+            <div class="ttv-info">
+              <div class="ttv-title">Reel parada en ruta al sur · gastronomía + senderismo</div>
+              <div class="ttv-date">24 de abril de 2026</div>
+            </div>
+            <div class="ttv-stats">
+              <div class="ttv-stat"><div class="ttv-stat-val">4,200</div><div class="ttv-stat-lbl">Vistas</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">235</div><div class="ttv-stat-lbl">Likes</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">63</div><div class="ttv-stat-lbl">Comp.</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">4</div><div class="ttv-stat-lbl">Cmts</div></div>
+            </div>
+          </div>
+          <div class="tiktok-top-video">
+            <div class="ttv-rank">3</div>
+            <div class="ttv-info">
+              <div class="ttv-title">Reel experiencia hacienda · desconexión / campo</div>
+              <div class="ttv-date">10 de mayo de 2026</div>
+            </div>
+            <div class="ttv-stats">
+              <div class="ttv-stat"><div class="ttv-stat-val">303</div><div class="ttv-stat-lbl">Vistas</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">13</div><div class="ttv-stat-lbl">Likes</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">0</div><div class="ttv-stat-lbl">Comp.</div></div>
+              <div class="ttv-stat"><div class="ttv-stat-val">2</div><div class="ttv-stat-lbl">Cmts</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demografía -->
+        <div class="section-title" style="margin-top:24px;">Demografía de audiencia — TikTok</div>
+        <div class="demo-grid">
+          <div class="demo-card">
+            <div class="demo-card-title">Distribución por sexo</div>
+            <div class="gender-row">
+              <div class="gender-label">Hombres</div>
+              <div class="gender-bar-wrap"><div class="gender-bar male" style="width:65%;"></div></div>
+              <div class="gender-pct">65%</div>
+            </div>
+            <div class="gender-row">
+              <div class="gender-label">Mujeres</div>
+              <div class="gender-bar-wrap"><div class="gender-bar female" style="width:35%;"></div></div>
+              <div class="gender-pct">35%</div>
+            </div>
+            <div style="margin-top:10px;padding:8px 10px;background:var(--cal-dim);border-radius:var(--r-sm);">
+              <div style="font-size:11px;color:var(--cerro);line-height:1.6;">Predominancia masculina (65%) — diverge del perfil Instagram/Facebook. Señal de que el contenido de aventura, senderismo y gastronomía campestre resuena con segmento masculino 25–44.</div>
+            </div>
+          </div>
+          <div class="demo-card">
+            <div class="demo-card-title">Distribución por edad</div>
+            <div class="age-row"><div class="age-label">25–34</div><div class="age-bar-wrap"><div class="age-bar" style="width:100%;"></div></div><div class="age-pct" style="color:var(--cal);">37.1%</div></div>
+            <div class="age-row"><div class="age-label">35–44</div><div class="age-bar-wrap"><div class="age-bar" style="width:60%;"></div></div><div class="age-pct">22.3%</div></div>
+            <div class="age-row"><div class="age-label">45–54</div><div class="age-bar-wrap"><div class="age-bar" style="width:55%;"></div></div><div class="age-pct">20.3%</div></div>
+            <div class="age-row"><div class="age-label">55+</div><div class="age-bar-wrap"><div class="age-bar" style="width:49%;"></div></div><div class="age-pct">18.3%</div></div>
+            <div class="age-row"><div class="age-label">18–24</div><div class="age-bar-wrap"><div class="age-bar" style="width:5%;"></div></div><div class="age-pct">2%</div></div>
+            <div style="margin-top:10px;padding:8px 10px;background:var(--cal-dim);border-radius:var(--r-sm);">
+              <div style="font-size:11px;color:var(--cerro);line-height:1.6;">Rango 25–34 dominante (37.1%) pero con cola robusta 35–54 (42.6% combinado). Perfil adulto con capacidad de gasto alineado al buyer persona de turismo de experiencia.</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ch-tiktok-organico -->
+
+      <!-- TIKTOK PAUTA -->
+      <div class="channel-view" id="ch-tiktok-pauta-1">
+        <div class="billing-note" style="margin-bottom:0;">
+          <strong>Inversión en TikTok Ads — Etapa 1:</strong> S/ 25.00 registrados en el período. Los datos de rendimiento de campañas TikTok Ads serán incorporados en próximas versiones del dashboard conforme estén disponibles en plataforma.
+        </div>
+        <div class="placeholder-stage" style="margin-top:16px;">
+          <div class="placeholder-icon">◈</div>
+          <p>Registra la inversión diaria de TikTok Ads usando el panel superior.<br>El detalle de campañas se documentará cuando haya datos suficientes de rendimiento.</p>
+        </div>
+      </div><!-- /ch-tiktok-pauta -->
+
+    </div><!-- /plat-tiktok-1 -->
+
+    <!-- FOOTER -->
+    <div class="footer" id="footer-1">
+      <span class="footer-item">Meta: <strong id="footer-meta-1">S/ 149.52</strong> &nbsp;·&nbsp; TikTok: <strong id="footer-tiktok-1">S/ 25.00</strong> &nbsp;·&nbsp; Total: <strong id="footer-total-1">S/ 174.52</strong></span>
+      <span class="footer-item">Etapa 1 · 7 abr – 8 may 2026</span>
+    </div>
+
+  </div><!-- /stage-1 -->
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- ETAPA 2 -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="stage-content" id="stage-2">
+
+    <!-- INVEST BANNER -->
+    <div class="invest-grid">
+      <div class="invest-card total">
+        <div class="invest-card-label">Inversión total — Etapa 2</div>
+        <div class="invest-card-value" id="total-invest-2">S/ 0.00</div>
+        <div class="invest-card-sub" id="total-invest-sub-2">Meta + TikTok · 4 may – 7 jun</div>
+      </div>
+
+      <div class="invest-card">
+        <div class="invest-card-label">Meta Ads</div>
+        <div class="invest-card-value" style="color:var(--tierra);" id="meta-display-2">S/ 0.00</div>
+        <div class="invest-card-sub">Etapa 2 · en curso</div>
+        <div class="invest-edit-row">
+          <span class="invest-edit-label">+ Registrar</span>
+          <select class="invest-edit-select" id="meta-type-2">
+            <option value="consumo">Consumo</option>
+            <option value="recarga">Recarga</option>
+          </select>
+          <input class="invest-edit-input" type="number" step="0.01" min="0" placeholder="S/ 0.00" id="meta-input-2">
+          <input class="invest-edit-input" type="date" id="meta-date-2" style="width:110px;">
+          <button class="invest-edit-btn" onclick="addEntry('meta',2)">Añadir</button>
+        </div>
+        <div class="invest-log" id="meta-log-2"></div>
+      </div>
+
+      <div class="invest-card">
+        <div class="invest-card-label">TikTok Ads</div>
+        <div class="invest-card-value" style="color:var(--green-text);" id="tiktok-display-2">S/ 0.00</div>
+        <div class="invest-card-sub">Etapa 2 · en curso</div>
+        <div class="invest-edit-row">
+          <span class="invest-edit-label">+ Registrar</span>
+          <select class="invest-edit-select" id="tiktok-type-2">
+            <option value="consumo">Consumo</option>
+            <option value="recarga">Recarga</option>
+          </select>
+          <input class="invest-edit-input" type="number" step="0.01" min="0" placeholder="S/ 0.00" id="tiktok-input-2">
+          <input class="invest-edit-input" type="date" id="tiktok-date-2" style="width:110px;">
+          <button class="invest-edit-btn" onclick="addEntry('tiktok',2)">Añadir</button>
+        </div>
+        <div class="invest-log" id="tiktok-log-2"></div>
+      </div>
+    </div>
+
+    <div class="placeholder-stage">
+      <div class="placeholder-icon">◈</div>
+      <p>Los datos de rendimiento de la Etapa 2 se irán registrando conforme avance el período.<br>
+      Usa los campos de arriba para registrar la inversión diaria en Meta y TikTok.</p>
+    </div>
+
+    <div class="section-title" id="billing-title-2" style="display:none;">Facturación diaria — Etapa 2</div>
+    <div class="billing-grid" id="billing-grid-2"></div>
+
+    <div class="footer" style="margin-top:28px;" id="footer-2">
+      <span class="footer-item">Meta: <strong id="footer-meta-2">S/ 0.00</strong> &nbsp;·&nbsp; TikTok: <strong id="footer-tiktok-2">S/ 0.00</strong> &nbsp;·&nbsp; Total: <strong id="footer-total-2">S/ 0.00</strong></span>
+      <span class="footer-item">Etapa 2 · 4 may – 7 jun 2026</span>
+    </div>
+
+  </div><!-- /stage-2 -->
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- ETAPA 3 (placeholder) -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="stage-content" id="stage-3">
+
+    <div class="invest-grid">
+      <div class="invest-card total">
+        <div class="invest-card-label">Inversión total — Etapa 3</div>
+        <div class="invest-card-value" id="total-invest-3">S/ 0.00</div>
+        <div class="invest-card-sub">Meta + TikTok · Período por definir</div>
+      </div>
+      <div class="invest-card">
+        <div class="invest-card-label">Meta Ads</div>
+        <div class="invest-card-value" style="color:var(--tierra);" id="meta-display-3">S/ 0.00</div>
+        <div class="invest-card-sub">Período por definir</div>
+        <div class="invest-edit-row">
+          <span class="invest-edit-label">+ Registrar</span>
+          <select class="invest-edit-select" id="meta-type-3">
+            <option value="consumo">Consumo</option>
+            <option value="recarga">Recarga</option>
+          </select>
+          <input class="invest-edit-input" type="number" step="0.01" min="0" placeholder="S/ 0.00" id="meta-input-3">
+          <input class="invest-edit-input" type="date" id="meta-date-3" style="width:110px;">
+          <button class="invest-edit-btn" onclick="addEntry('meta',3)">Añadir</button>
+        </div>
+        <div class="invest-log" id="meta-log-3"></div>
+      </div>
+      <div class="invest-card">
+        <div class="invest-card-label">TikTok Ads</div>
+        <div class="invest-card-value" style="color:var(--green-text);" id="tiktok-display-3">S/ 0.00</div>
+        <div class="invest-card-sub">Período por definir</div>
+        <div class="invest-edit-row">
+          <span class="invest-edit-label">+ Registrar</span>
+          <select class="invest-edit-select" id="tiktok-type-3">
+            <option value="consumo">Consumo</option>
+            <option value="recarga">Recarga</option>
+          </select>
+          <input class="invest-edit-input" type="number" step="0.01" min="0" placeholder="S/ 0.00" id="tiktok-input-3">
+          <input class="invest-edit-input" type="date" id="tiktok-date-3" style="width:110px;">
+          <button class="invest-edit-btn" onclick="addEntry('tiktok',3)">Añadir</button>
+        </div>
+        <div class="invest-log" id="tiktok-log-3"></div>
+      </div>
+    </div>
+
+    <div class="placeholder-stage">
+      <div class="placeholder-icon">◈</div>
+      <p>Etapa 3 pendiente de activación.<br>Define el período e inicia el registro de inversión cuando corresponda.</p>
+    </div>
+
+    <div class="section-title" id="billing-title-3" style="display:none;">Facturación diaria — Etapa 3</div>
+    <div class="billing-grid" id="billing-grid-3"></div>
+
+    <div class="footer" style="margin-top:28px;" id="footer-3">
+      <span class="footer-item">Meta: <strong id="footer-meta-3">S/ 0.00</strong> &nbsp;·&nbsp; TikTok: <strong id="footer-tiktok-3">S/ 0.00</strong> &nbsp;·&nbsp; Total: <strong id="footer-total-3">S/ 0.00</strong></span>
+      <span class="footer-item">Etapa 3 · Período por definir</span>
+    </div>
+
+  </div><!-- /stage-3 -->
+
+</div><!-- /page-wrap -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── PLATFORM / CHANNEL NAVIGATION ────────────────────────────────────────────
+function switchPlatform(stage, platform) {
+  // Toggle platform buttons
+  const metaBtn   = document.getElementById(`plat-btn-meta-${stage}`);
+  const tiktokBtn = document.getElementById(`plat-btn-tiktok-${stage}`);
+  if (metaBtn)   { metaBtn.classList.remove('active-meta', 'active-tiktok'); }
+  if (tiktokBtn) { tiktokBtn.classList.remove('active-meta', 'active-tiktok'); }
+
+  if (platform === 'meta' && metaBtn)     metaBtn.classList.add('active-meta');
+  if (platform === 'tiktok' && tiktokBtn) tiktokBtn.classList.add('active-tiktok');
+
+  // Toggle platform views
+  ['meta','tiktok'].forEach(p => {
+    const view = document.getElementById(`plat-${p}-${stage}`);
+    if (view) view.classList.toggle('visible', p === platform);
+  });
+}
+
+function switchChannel(stage, platform, channel) {
+  // Toggle tab active state
+  ['organico','pauta'].forEach(ch => {
+    const tab = document.getElementById(`tab-${platform}-${ch}-${stage}`);
+    if (tab) tab.classList.toggle('active', ch === channel);
+  });
+
+  // Toggle channel views
+  ['organico','pauta'].forEach(ch => {
+    const view = document.getElementById(`ch-${platform}-${ch}-${stage}`);
+    if (view) view.classList.toggle('visible', ch === channel);
+  });
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const BASE = {
+  meta:   { 1: 149.52, 2: 0, 3: 0 },
+  tiktok: { 1: 25.00,  2: 0, 3: 0 }
+};
+
+let entries = JSON.parse(localStorage.getItem('mts_entries') || '{"meta":{"1":[],"2":[],"3":[]},"tiktok":{"1":[],"2":[],"3":[]}}');
+
+// Stage dates state
+const DEFAULT_STAGES = {
+  1: { start: '2026-04-07', end: '2026-05-08', name: '' },
+  2: { start: '2026-05-04', end: '2026-06-07', name: '' },
+  3: { start: '',           end: '',           name: '' }
+};
+let stageDates = JSON.parse(localStorage.getItem('mts_stage_dates') || JSON.stringify(DEFAULT_STAGES));
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  [1,2,3].forEach(s => {
+    const md = document.getElementById(`meta-date-${s}`);
+    const td = document.getElementById(`tiktok-date-${s}`);
+    if (md) md.value = today;
+    if (td) td.value = today;
+  });
+
+  document.getElementById('last-updated').textContent =
+    'Actualizado: ' + new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  [1,2,3].forEach(s => {
+    renderLog('meta', s);
+    renderLog('tiktok', s);
+    renderBillingEntries(s);
+    updateTotals(s);
+    applyStageLabel(s);
+    syncPanelInputs(s);
+  });
+
+  // Close panels on outside click
+  document.addEventListener('click', (e) => {
+    [1,2,3].forEach(s => {
+      const panel = document.getElementById(`date-panel-${s}`);
+      const wrap  = document.getElementById(`wrap-${s}`);
+      if (panel && panel.classList.contains('open') && !wrap.contains(e.target)) {
+        panel.classList.remove('open');
+      }
+    });
+  });
+});
+
+// ── STAGE SWITCH ──────────────────────────────────────────────────────────────
+function switchStage(n) {
+  document.querySelectorAll('.stage-content').forEach(el => el.classList.remove('visible'));
+  document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`stage-${n}`).classList.add('visible');
+  document.querySelector(`[data-stage="${n}"]`).classList.add('active');
+  // Close any open panel
+  [1,2,3].forEach(s => document.getElementById(`date-panel-${s}`)?.classList.remove('open'));
+}
+
+// ── DATE PANEL ────────────────────────────────────────────────────────────────
+function toggleDatePanel(e, stage) {
+  e.stopPropagation();
+  const panel = document.getElementById(`date-panel-${stage}`);
+  const isOpen = panel.classList.contains('open');
+  // Close all panels first
+  [1,2,3].forEach(s => document.getElementById(`date-panel-${s}`)?.classList.remove('open'));
+  if (!isOpen) {
+    syncPanelInputs(stage);
+    panel.classList.add('open');
+  }
+}
+
+function closeDatePanel(stage) {
+  document.getElementById(`date-panel-${stage}`)?.classList.remove('open');
+}
+
+function syncPanelInputs(stage) {
+  const d = stageDates[stage] || DEFAULT_STAGES[stage];
+  const si = document.getElementById(`panel-start-${stage}`);
+  const ei = document.getElementById(`panel-end-${stage}`);
+  const ni = document.getElementById(`panel-name-${stage}`);
+  if (si) si.value = d.start || '';
+  if (ei) ei.value = d.end   || '';
+  if (ni) ni.value = d.name  || '';
+}
+
+function saveDatePanel(stage) {
+  const start = document.getElementById(`panel-start-${stage}`)?.value || '';
+  const end   = document.getElementById(`panel-end-${stage}`)?.value   || '';
+  const name  = document.getElementById(`panel-name-${stage}`)?.value  || '';
+
+  stageDates[stage] = { start, end, name };
+  localStorage.setItem('mts_stage_dates', JSON.stringify(stageDates));
+
+  applyStageLabel(stage);
+  closeDatePanel(stage);
+  showToast(`Etapa ${stage} actualizada`);
+}
+
+function applyStageLabel(stage) {
+  const d = stageDates[stage] || DEFAULT_STAGES[stage];
+  const labelEl = document.getElementById(`stage-dates-label-${stage}`);
+  if (!labelEl) return;
+
+  const btnLabelEl = document.querySelector(`[data-stage="${stage}"] .stage-btn-label`);
+
+  // Format label text
+  let dateStr = 'Por definir';
+  if (d.start && d.end) {
+    dateStr = `${fmtDate(d.start)} → ${fmtDate(d.end)}`;
+  } else if (d.start) {
+    dateStr = `${fmtDate(d.start)} → …`;
+  }
+  labelEl.textContent = dateStr;
+
+  // Update stage label name if custom
+  if (btnLabelEl && d.name) {
+    btnLabelEl.textContent = d.name;
+  } else if (btnLabelEl) {
+    btnLabelEl.textContent = `Etapa ${stage}`;
+  }
+
+  // Also update the invest-card-sub for total card
+  const sub = document.getElementById(`total-invest-sub-${stage}`);
+  if (sub) {
+    sub.textContent = `Meta + TikTok · ${dateStr}`;
+  }
+
+  // Update footer
+  const footerRight = document.querySelector(`#footer-${stage} .footer-item:last-child`);
+  if (footerRight && dateStr !== 'Por definir') {
+    footerRight.textContent = `${d.name || 'Etapa ' + stage} · ${dateStr}`;
+  }
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('es-PE', { day:'numeric', month:'short' });
+}
+
+// ── ADD ENTRY ─────────────────────────────────────────────────────────────────
+function addEntry(platform, stage) {
+  const inputEl  = document.getElementById(`${platform}-input-${stage}`);
+  const dateEl   = document.getElementById(`${platform}-date-${stage}`);
+  const typeEl   = document.getElementById(`${platform}-type-${stage}`);
+  const amount   = parseFloat(inputEl.value);
+  const date     = dateEl.value;
+  const entryType = typeEl ? typeEl.value : 'consumo'; // 'consumo' | 'recarga'
+
+  if (!amount || amount <= 0) { showToast('Ingresa un monto válido'); return; }
+  if (!date) { showToast('Selecciona una fecha'); return; }
+
+  if (!entries[platform]) entries[platform] = {};
+  if (!entries[platform][stage]) entries[platform][stage] = [];
+
+  entries[platform][stage].push({ date, amount, entryType });
+  entries[platform][stage].sort((a,b) => a.date.localeCompare(b.date));
+
+  save();
+  renderLog(platform, stage);
+  renderBillingEntries(stage);
+  updateTotals(stage);
+
+  inputEl.value = '';
+  const typeLabel = entryType === 'recarga' ? 'Recarga' : 'Consumo';
+  showToast(`${typeLabel} S/ ${amount.toFixed(2)} registrado en ${platform === 'meta' ? 'Meta' : 'TikTok'}`);
+}
+
+// ── REMOVE ENTRY ──────────────────────────────────────────────────────────────
+function removeEntry(platform, stage, idx) {
+  entries[platform][stage].splice(idx, 1);
+  save();
+  renderLog(platform, stage);
+  renderBillingEntries(stage);
+  updateTotals(stage);
+}
+
+// ── RENDER LOG (compact list inside invest card) ───────────────────────────────
+function renderLog(platform, stage) {
+  const container = document.getElementById(`${platform}-log-${stage}`);
+  if (!container) return;
+  const list = (entries[platform]?.[stage]) || [];
+  if (list.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = list.map((e, i) => {
+    const d = new Date(e.date + 'T12:00:00');
+    const label = d.toLocaleDateString('es-PE', { day:'2-digit', month:'short' });
+    const isRecarga = e.entryType === 'recarga';
+    const prefix = isRecarga ? '+' : '';
+    const typeTag = isRecarga
+      ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--green-text);letter-spacing:0.08em;">RECARGA</span>`
+      : `<span style="font-family:var(--font-mono);font-size:9px;color:var(--cerro);letter-spacing:0.08em;">CONSUMO</span>`;
+    return `<div class="invest-log-item">
+      <span class="invest-log-date">${label}</span>
+      ${typeTag}
+      <span class="invest-log-amount">${prefix}S/ ${parseFloat(e.amount).toFixed(2)}</span>
+      <button class="invest-log-remove" onclick="removeEntry('${platform}',${stage},${i})" title="Eliminar">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ── STATIC BASE BILLING DATA (Etapa 1) ───────────────────────────────────────
+// date: ISO string used for sort order; label: display string; type: 'meta'|'tiktok'|'recarga-meta'|'recarga-tiktok'
+const BASE_BILLING = [
+  { date: '2026-04-24', label: '24 abr', amount: 150.00, type: 'recarga-meta' },
+  { date: '2026-04-24', label: '24 abr', amount: 11.59,  type: 'meta',         isBase: true },
+  { date: '2026-04-24', label: '24 abr', amount: 25.00,  type: 'recarga-tiktok' },
+  { date: '2026-04-25', label: '25 abr', amount: 11.59,  type: 'meta' },
+  { date: '2026-04-26', label: '26 abr', amount: 19.07,  type: 'meta' },
+  { date: '2026-04-27', label: '27 abr', amount: 24.81,  type: 'meta' },
+  { date: '2026-04-28', label: '28 abr', amount: 18.42,  type: 'meta' },
+  { date: '2026-04-29', label: '29 abr', amount: 14.40,  type: 'meta' },
+  { date: '2026-04-30', label: '30 abr', amount: 10.03,  type: 'meta' },
+  { date: '2026-05-01', label: '1 may',  amount: 14.35,  type: 'meta' },
+  { date: '2026-05-02', label: '2 may',  amount: 13.69,  type: 'meta' },
+  { date: '2026-05-03', label: '3 may',  amount:  4.28,  type: 'meta' },
+  { date: '2026-05-04', label: '4 may',  amount: 15.36,  type: 'meta', highlight: true },
+  { date: '2026-05-05', label: '5 may',  amount: 50.00,  type: 'recarga-tiktok' },
+  { date: '2026-05-05', label: '5 may',  amount:  3.57,  type: 'meta' },
+  { date: '2026-05-08', label: '8 may',  amount: 100.00, type: 'recarga-meta' },
+];
+
+// ── RENDER BILLING ENTRIES ─────────────────────────────────────────────────────
+function renderBillingEntries(stage) {
+  const grid    = document.getElementById(`billing-grid-${stage}`);
+  const titleEl = document.getElementById(`billing-title-${stage}`);
+  if (!grid) return;
+
+  // Clear grid completely — we rebuild from scratch
+  grid.innerHTML = '';
+
+  const metaList   = (entries.meta?.[stage])   || [];
+  const tiktokList = (entries.tiktok?.[stage]) || [];
+
+  // Build unified list
+  let allItems = [];
+
+  // Stage 1: seed with static base data
+  if (stage === 1) {
+    BASE_BILLING.forEach(b => allItems.push({ ...b, isBase: true }));
+  }
+
+  // Add manual entries for meta
+  metaList.forEach((e, i) => allItems.push({
+    date: e.date,
+    label: fmtDate(e.date),
+    amount: parseFloat(e.amount),
+    type: 'meta',
+    entryType: e.entryType || 'consumo',
+    isBase: false,
+    removeIdx: i
+  }));
+
+  // Add manual entries for tiktok
+  tiktokList.forEach((e, i) => allItems.push({
+    date: e.date,
+    label: fmtDate(e.date),
+    amount: parseFloat(e.amount),
+    type: 'tiktok',
+    entryType: e.entryType || 'consumo',
+    isBase: false,
+    removeIdx: i
+  }));
+
+  // Sort chronologically; within same date: base items first, then tiktok, then meta
+  allItems.sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    // Within same date: recarga first, then meta/tiktok base, then manual entries
+    const typeOrder = t => (t === 'recarga-meta' || t === 'recarga-tiktok') ? 0 : (t === 'meta' || t === 'tiktok') ? 1 : 2;
+    if (a.isBase && b.isBase) return typeOrder(a.type) - typeOrder(b.type);
+    if (a.isBase && !b.isBase) return -1;
+    if (!a.isBase && b.isBase) return 1;
+    return 0;
+  });
+
+  if (allItems.length === 0) {
+    if (stage !== 1 && titleEl) titleEl.style.display = 'none';
+    return;
+  }
+  if (stage !== 1 && titleEl) titleEl.style.display = '';
+
+  allItems.forEach(item => {
+    const cell = document.createElement('div');
+
+    if (item.type === 'recarga-meta' || item.type === 'recarga-tiktok') {
+      const platLabel = item.type === 'recarga-meta' ? 'Recarga · Meta' : 'Recarga · TikTok';
+      const cls = item.type === 'recarga-tiktok' ? 'billing-day recarga entry-tiktok' : 'billing-day recarga';
+      cell.className = cls;
+      cell.innerHTML = `
+        <div class="billing-day-date">${item.label}</div>
+        <div class="billing-day-amount">+S/ ${item.amount.toFixed(2)}</div>
+        <div class="billing-day-platform">${platLabel}</div>
+      `;
+    } else if (item.isBase) {
+      const tiktokCls = item.type === 'tiktok' ? ' entry-tiktok' : '';
+      cell.className = `billing-day${item.highlight ? ' highlight' : ''}${tiktokCls}`;
+      cell.innerHTML = `
+        <div class="billing-day-date">${item.label}</div>
+        <div class="billing-day-amount">S/ ${item.amount.toFixed(2)}</div>
+        <div class="billing-day-platform">${item.type === 'meta' ? 'Meta' : 'TikTok'}</div>
+      `;
+    } else {
+      // Manual entry — colored + removable
+      const isRecarga  = item.entryType === 'recarga';
+      const platKey    = item.type; // 'meta' | 'tiktok'
+      const baseCls    = platKey === 'tiktok' ? 'entry-tiktok' : 'entry-meta';
+      const recargaCls = isRecarga ? ' recarga' : '';
+      const platLabel  = platKey === 'meta' ? 'Meta' : 'TikTok';
+      const typeLabel  = isRecarga ? `Recarga · ${platLabel}` : platLabel;
+      const prefix     = isRecarga ? '+' : '';
+      const idx        = item.removeIdx;
+      cell.className   = `billing-day ${baseCls}${recargaCls}`;
+      cell.innerHTML   = `
+        <div class="billing-day-date">${item.label}</div>
+        <div class="billing-day-amount">${prefix}S/ ${item.amount.toFixed(2)}</div>
+        <div class="billing-day-platform">${typeLabel}</div>
+        <button class="billing-day-remove" onclick="removeBillingEntry(event,'${platKey}',${stage},${idx})" title="Eliminar">✕</button>
+      `;
+    }
+
+    grid.appendChild(cell);
+  });
+}
+
+// ── REMOVE FROM BILLING GRID ──────────────────────────────────────────────────
+function removeBillingEntry(evt, platform, stage, idx) {
+  evt.stopPropagation();
+  removeEntry(platform, stage, idx);
+}
+
+// ── UPDATE TOTALS ─────────────────────────────────────────────────────────────
+function updateTotals(stage) {
+  const metaBase    = BASE.meta[stage]   || 0;
+  const tiktokBase  = BASE.tiktok[stage] || 0;
+  const metaExtra   = ((entries.meta?.[stage])   || []).reduce((s,e) => s + parseFloat(e.amount), 0);
+  const tiktokExtra = ((entries.tiktok?.[stage]) || []).reduce((s,e) => s + parseFloat(e.amount), 0);
+
+  const metaTotal   = metaBase   + metaExtra;
+  const tiktokTotal = tiktokBase + tiktokExtra;
+  const grandTotal  = metaTotal  + tiktokTotal;
+
+  const fmt = v => `S/ ${v.toFixed(2)}`;
+
+  const md = document.getElementById(`meta-display-${stage}`);
+  const td = document.getElementById(`tiktok-display-${stage}`);
+  const tv = document.getElementById(`total-invest-${stage}`);
+  if (md) md.textContent = fmt(metaTotal);
+  if (td) td.textContent = fmt(tiktokTotal);
+  if (tv) tv.textContent = fmt(grandTotal);
+
+  const fm = document.getElementById(`footer-meta-${stage}`);
+  const ft = document.getElementById(`footer-tiktok-${stage}`);
+  const fg = document.getElementById(`footer-total-${stage}`);
+  if (fm) fm.textContent = fmt(metaTotal);
+  if (ft) ft.textContent = fmt(tiktokTotal);
+  if (fg) fg.textContent = fmt(grandTotal);
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+function save() {
+  localStorage.setItem('mts_entries', JSON.stringify(entries));
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+
+</body>
+</html>
